@@ -1,6 +1,8 @@
 name: CI
 
 on:
+  push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -8,27 +10,90 @@ permissions:
   contents: read
 
 jobs:
-  capture-pytest-evidence:
-    if: github.event_name == 'pull_request' && github.head_ref == 'chore/m1-verification'
+  fixture-state:
+    runs-on: ubuntu-latest
+    outputs:
+      present: ${{ steps.fixture-state.outputs.present }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      - id: fixture-state
+        shell: bash
+        run: |
+          if test -f data/raw/manifest.json \
+            && test -f data/raw/gdpc1_2024-01-25.csv \
+            && test -f data/raw/gdpc1_2024-02-28.csv; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  verify:
+    needs: fixture-state
+    if: needs.fixture-state.outputs.present == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e ".[dev]"
+      - name: Verify exact checked-out SHA
+        shell: bash
+        run: |
+          mkdir -p test-results
+          git rev-parse HEAD | tee test-results/verified-sha.txt
+          test "$(git rev-parse HEAD)" = "${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}"
+      - run: ruff format --check .
+      - run: ruff check .
+      - run: pytest --junitxml=test-results/pytest.xml
+      - name: Upload verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verification-${{ github.run_id }}-${{ github.run_attempt }}
+          path: test-results/
+          if-no-files-found: error
+
+  bootstrap-official-fixtures:
+    needs: fixture-state
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.fixture-state.outputs.present == 'false'
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: chore/m1-verification
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - run: python -m pip install -e ".[dev]"
-      - run: ruff format --check .
-      - run: ruff check .
-      - run: pytest --junitxml=.ci/pytest-results.xml
-      - name: Commit machine-readable test evidence
+      - name: Fetch and commit locked ALFRED fixtures locally
         shell: bash
         run: |
+          python scripts/fetch_fixtures.py
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .ci/pytest-results.xml
-          git commit -m "ci: capture exact pytest evidence"
-          git push origin HEAD:chore/m1-verification
+          git add data/raw
+          git commit -m "data: add verified ALFRED vintage fixtures"
+      - name: Verify bootstrap commit before push
+        shell: bash
+        run: |
+          mkdir -p test-results
+          git rev-parse HEAD | tee test-results/verified-sha.txt
+          ruff format --check .
+          ruff check .
+          pytest --junitxml=test-results/pytest.xml
+      - name: Upload bootstrap verification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootstrap-verification-${{ github.run_id }}-${{ github.run_attempt }}
+          path: test-results/
+          if-no-files-found: error
+      - name: Push only the verified bootstrap commit
+        run: git push origin HEAD:main

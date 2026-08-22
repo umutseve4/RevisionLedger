@@ -10,7 +10,7 @@ Acceptance criteria:
 - [x] fail-closed checksum, byte-size, and vintage-header validation;
 - [x] idempotent transactional ingestion and conflict failure;
 - [x] automated interval, boundary, missing-value, and provenance tests;
-- [ ] official fixture bytes committed by the bootstrap workflow;
+- [x] official fixture bytes committed by the bootstrap workflow;
 - [ ] final `main` SHA has a green CI run.
 
 ## M2 — Generalize without weakening provenance
