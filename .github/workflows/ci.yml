@@ -57,12 +57,36 @@ jobs:
           pytest
           echo "VERIFIED_SHA=$(git rev-parse HEAD)"
 
-  test:
+  format:
     needs: fixture-state
     if: needs.fixture-state.outputs.present == 'true'
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: python -m pip install ruff==0.11.2
+      - run: ruff format --check .
+
+  lint:
+    needs: fixture-state
+    if: needs.fixture-state.outputs.present == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: python -m pip install ruff==0.11.2
+      - run: ruff check .
+
+  pytest:
+    needs: fixture-state
+    if: needs.fixture-state.outputs.present == 'true'
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -71,8 +95,6 @@ jobs:
           cache: pip
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -e ".[dev]"
-      - run: ruff format --check .
-      - run: ruff check .
       - run: pytest
       - name: Bind evidence to tested commit
         run: echo "VERIFIED_SHA=$GITHUB_SHA"
