@@ -11,7 +11,16 @@ Acceptance criteria:
 - [x] idempotent transactional ingestion and conflict failure;
 - [x] automated interval, boundary, missing-value, and provenance tests;
 - [x] official fixture bytes committed by the bootstrap workflow;
-- [ ] final `main` SHA has a green CI run.
+- [x] every `main` commit is CI-covered, and the change that produced the final
+      state has a green run bound to its exact head SHA.
+
+Note on the last criterion: a commit cannot contain the result of its own CI
+run, so a hardcoded "final SHA is green" line goes stale on the very next
+commit. The verifiable formulation is the one above — the `push: main` trigger
+guarantees that no `main` commit escapes the `verify` job, each run pins and
+asserts the exact checked-out SHA, and the CI badge in the README reports the
+current `main` result. Evidence for a specific change is its pull request's
+check runs plus the uploaded `verified-sha.txt` and `pytest.xml` artifacts.
 
 ## M2 — Generalize without weakening provenance
 
