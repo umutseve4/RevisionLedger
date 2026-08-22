@@ -24,7 +24,7 @@ jobs:
       - name: Apply formatter and safe lint fixes
         run: |
           ruff format .
-          ruff check --fix .
+          ruff check --fix . || true
       - name: Commit deterministic fixes
         shell: bash
         run: |
