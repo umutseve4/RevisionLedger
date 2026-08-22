@@ -23,7 +23,7 @@ EXPECTED = {
 
 
 def fetch(url: str) -> bytes:
-    request = Request(
+    request = Request(  # noqa: S310 - URL is constructed from a fixed HTTPS host
         url,
         headers={"User-Agent": "RevisionLedger/0.1 (+https://github.com/umutseve4/RevisionLedger)"},
     )
