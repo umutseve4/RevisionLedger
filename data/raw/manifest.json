@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "fixtures": [
+    {
+      "path": "gdpc1_2024-01-25.csv",
+      "series_id": "GDPC1",
+      "vintage_date": "2024-01-25",
+      "observation_date_range": {
+        "start": "2023-10-01",
+        "end": "2023-10-01"
+      },
+      "source_url": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=GDPC1&cosd=2023-10-01&coed=2023-10-01&vintage_date=2024-01-25",
+      "retrieved_at": "2026-08-22T11:20:56Z",
+      "byte_size": 53,
+      "sha256": "85c7e1895b21a217b73e1fdc8f3a1cc2953afdbe321d27c301ce228466b3414a"
+    },
+    {
+      "path": "gdpc1_2024-02-28.csv",
+      "series_id": "GDPC1",
+      "vintage_date": "2024-02-28",
+      "observation_date_range": {
+        "start": "2023-10-01",
+        "end": "2023-10-01"
+      },
+      "source_url": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=GDPC1&cosd=2023-10-01&coed=2023-10-01&vintage_date=2024-02-28",
+      "retrieved_at": "2026-08-22T11:20:56Z",
+      "byte_size": 53,
+      "sha256": "6d0598234b9a97d4cef47a1f91cae0d51f2bd87e8d680d2bffd5e6a5feb04753"
+    }
+  ]
+}
