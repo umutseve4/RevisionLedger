@@ -36,6 +36,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: pip
       - name: Fetch bounded ALFRED snapshots and verify locked evidence
         run: python scripts/fetch_fixtures.py
       - name: Commit immutable fixtures and checksums
@@ -46,6 +47,15 @@ jobs:
           git add data/raw
           git commit -m "data: add verified ALFRED vintage fixtures"
           git push
+      - name: Verify the exact bootstrap commit
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+          ruff format --check .
+          ruff check .
+          pytest
+          echo "VERIFIED_SHA=$(git rev-parse HEAD)"
 
   test:
     needs: fixture-state

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import csv
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 import hashlib
 import io
 import json
@@ -54,9 +54,7 @@ def validate(raw: bytes, vintage_date: str) -> None:
 
 def main() -> None:
     RAW.mkdir(parents=True, exist_ok=True)
-    retrieved_at = (
-        datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-    )
+    retrieved_at = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     fixtures = []
     for vintage_date in EXPECTED:
         url = (
