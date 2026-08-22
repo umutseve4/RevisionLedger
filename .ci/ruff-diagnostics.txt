@@ -1,0 +1,2 @@
+scripts/fetch_fixtures.py:26:15: S310 Audit URL open for permitted schemes. Allowing use of `file:` or custom schemes is often unexpected.
+Found 1 error.
