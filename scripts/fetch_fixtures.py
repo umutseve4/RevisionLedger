@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import csv
-from datetime import UTC, datetime
 import hashlib
 import io
 import json
-from pathlib import Path
 import time
+from datetime import UTC, datetime
+from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -25,9 +25,7 @@ EXPECTED = {
 def fetch(url: str) -> bytes:
     request = Request(
         url,
-        headers={
-            "User-Agent": "RevisionLedger/0.1 (+https://github.com/umutseve4/RevisionLedger)"
-        },
+        headers={"User-Agent": "RevisionLedger/0.1 (+https://github.com/umutseve4/RevisionLedger)"},
     )
     error: Exception | None = None
     for attempt in range(4):

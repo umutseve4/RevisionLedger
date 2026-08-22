@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import sqlite3
 from dataclasses import dataclass
 from decimal import Decimal
-import sqlite3
 
 
 @dataclass(frozen=True)

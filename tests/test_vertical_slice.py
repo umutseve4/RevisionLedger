@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import replace
-from decimal import Decimal
 import hashlib
 import json
-from pathlib import Path
 import sqlite3
+from dataclasses import replace
+from decimal import Decimal
+from pathlib import Path
 
 import pytest
 
@@ -85,9 +85,7 @@ def test_decimal_is_preserved_as_canonical_text(tmp_path: Path) -> None:
     ingest_manifest(connection, write_fixture(tmp_path, "2024-01-25", "22672.8590"))
     row = connection.execute("SELECT value_text FROM observations").fetchone()
     assert row["value_text"] == "22672.8590"
-    assert as_of(connection, "GDPC1", "2023-10-01", "2024-02-01").value == Decimal(
-        "22672.8590"
-    )
+    assert as_of(connection, "GDPC1", "2023-10-01", "2024-02-01").value == Decimal("22672.8590")
 
 
 @pytest.mark.parametrize("missing", [".", ""])
