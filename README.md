@@ -33,7 +33,7 @@ ruff format --check .
 ruff check .
 ```
 
-CI runs from committed fixtures without network access. The only networked step is the one-time, fail-closed fixture bootstrap: it accepts only the ALFRED vintage-stamped headers and locked values, then commits the immutable bytes and checksums.
+CI runs from committed fixtures without network access. Pull-request verification is read-only and uploads JUnit XML plus the exact checked-out Git SHA as a run artifact. The only networked write path is the fail-closed fixture bootstrap on `main`; it verifies the locally created commit before pushing it.
 
 ## Query
 
@@ -75,12 +75,16 @@ WHERE series_id = ?
 
 | Layer | Status | Evidence |
 |---|---|---|
-| Problem and temporal model | Implemented | schema, interval semantics, query |
-| Official bounded fixtures | Verified after bootstrap | raw bytes + manifest SHA-256 |
-| Ingestion and `AS OF` query | Implemented | `src/revisionledger/` |
-| Automated behavior | Tested when CI is green | pytest + Ruff on the badge commit |
+| Problem and temporal model | Implemented | schema, interval semantics, parameterized query |
+| Official bounded fixtures | Verified | bootstrap commit `1fe178c02a89399c1de4a8034e34b4105e7da000` and manifest |
+| 2024-01-25 fixture | Verified | 53 bytes; SHA-256 `85c7e1895b21a217b73e1fdc8f3a1cc2953afdbe321d27c301ce228466b3414a` |
+| 2024-02-28 fixture | Verified | 53 bytes; SHA-256 `6d0598234b9a97d4cef47a1f91cae0d51f2bd87e8d680d2bffd5e6a5feb04753` |
+| Automated behavior | Tested | GitHub-hosted JUnit evidence: 16 tests, 0 failures, 0 errors, 0 skipped |
+| Final `main` commit | Pending verification | requires a green CI run on the exact final SHA |
 | Deployment | Not applicable | library vertical slice |
 | Production-ready | Not claimed | no migrations, backup, monitoring, or multi-writer design |
+
+The two fixture byte lengths and SHA-256 values above were independently recomputed from the committed bytes and matched `data/raw/manifest.json` exactly.
 
 ## Source and limitations
 

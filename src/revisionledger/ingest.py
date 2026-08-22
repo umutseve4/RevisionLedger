@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import csv
-from dataclasses import dataclass
-from datetime import date
-from decimal import Decimal, InvalidOperation
 import hashlib
 import io
 import json
-from pathlib import Path
 import sqlite3
+from dataclasses import dataclass
+from datetime import date
+from decimal import Decimal, InvalidOperation
+from pathlib import Path
 from typing import Any
 
 
@@ -164,9 +164,7 @@ def _rebuild_system_intervals(connection: sqlite3.Connection, series_id: str) ->
         ).fetchall()
         for index, vintage in enumerate(vintages):
             next_vintage = (
-                vintages[index + 1]["source_vintage_date"]
-                if index + 1 < len(vintages)
-                else None
+                vintages[index + 1]["source_vintage_date"] if index + 1 < len(vintages) else None
             )
             connection.execute(
                 """UPDATE observations SET system_to = ?

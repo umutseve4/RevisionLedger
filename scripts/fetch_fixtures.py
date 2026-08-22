@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import csv
-from datetime import datetime, timezone
 import hashlib
 import io
 import json
-from pathlib import Path
 import time
+from datetime import UTC, datetime
+from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -23,11 +23,9 @@ EXPECTED = {
 
 
 def fetch(url: str) -> bytes:
-    request = Request(
+    request = Request(  # noqa: S310 - URL is constructed from a fixed HTTPS host
         url,
-        headers={
-            "User-Agent": "RevisionLedger/0.1 (+https://github.com/umutseve4/RevisionLedger)"
-        },
+        headers={"User-Agent": "RevisionLedger/0.1 (+https://github.com/umutseve4/RevisionLedger)"},
     )
     error: Exception | None = None
     for attempt in range(4):
@@ -54,9 +52,7 @@ def validate(raw: bytes, vintage_date: str) -> None:
 
 def main() -> None:
     RAW.mkdir(parents=True, exist_ok=True)
-    retrieved_at = (
-        datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-    )
+    retrieved_at = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     fixtures = []
     for vintage_date in EXPECTED:
         url = (
