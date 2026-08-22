@@ -22,7 +22,7 @@ A normal time series records when a value applies. A bitemporal table records bo
 - **valid time** — the economic observation interval `[valid_from, valid_to)`;
 - **system/knowledge time** — the locally captured vintage interval `[system_from, system_to)`.
 
-`system_to IS NULL` means “latest snapshot in this local ledger,” not “still current at ALFRED.”
+`system_to IS NULL` means "latest snapshot in this local ledger," not "still current at ALFRED."
 
 ## Reproduce
 
@@ -80,11 +80,13 @@ WHERE series_id = ?
 | 2024-01-25 fixture | Verified | 53 bytes; SHA-256 `85c7e1895b21a217b73e1fdc8f3a1cc2953afdbe321d27c301ce228466b3414a` |
 | 2024-02-28 fixture | Verified | 53 bytes; SHA-256 `6d0598234b9a97d4cef47a1f91cae0d51f2bd87e8d680d2bffd5e6a5feb04753` |
 | Automated behavior | Tested | GitHub-hosted JUnit evidence: 16 tests, 0 failures, 0 errors, 0 skipped |
-| Final `main` commit | Pending verification | requires a green CI run on the exact final SHA |
+| `main` CI coverage | Verified | `push: main` runs the full `verify` job on every `main` commit; each run pins and asserts its exact checked-out SHA in `verified-sha.txt`; the badge above reports the current `main` result |
 | Deployment | Not applicable | library vertical slice |
 | Production-ready | Not claimed | no migrations, backup, monitoring, or multi-writer design |
 
 The two fixture byte lengths and SHA-256 values above were independently recomputed from the committed bytes and matched `data/raw/manifest.json` exactly.
+
+No commit can contain the result of its own CI run, so this table reports the coverage guarantee rather than a hardcoded run id that would go stale on the next push. The per-change evidence is the pull request's check runs together with the `verified-sha.txt` and `pytest.xml` artifacts uploaded by that run.
 
 ## Source and limitations
 
