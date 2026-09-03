@@ -33,7 +33,7 @@ ruff format --check .
 ruff check .
 ```
 
-CI runs from committed fixtures without network access. Pull-request verification is read-only and uploads JUnit XML plus the exact checked-out Git SHA as a run artifact. The only networked write path is the fail-closed fixture bootstrap on `main`; it verifies the locally created commit before pushing it.
+CI runs from committed fixtures without live-data network access or repository write permission. Pull-request verification uploads JUnit XML plus the exact checked-out Git SHA as a run artifact. Fixture refreshes are explicit, reviewable data changes performed outside the verification workflow; `scripts/fetch_fixtures.py` validates bounded responses before they are proposed for commit.
 
 ## Query
 
@@ -80,7 +80,7 @@ WHERE series_id = ?
 | 2024-01-25 fixture | Verified | 53 bytes; SHA-256 `85c7e1895b21a217b73e1fdc8f3a1cc2953afdbe321d27c301ce228466b3414a` |
 | 2024-02-28 fixture | Verified | 53 bytes; SHA-256 `6d0598234b9a97d4cef47a1f91cae0d51f2bd87e8d680d2bffd5e6a5feb04753` |
 | Automated behavior | Tested | GitHub-hosted JUnit evidence: 16 tests, 0 failures, 0 errors, 0 skipped |
-| `main` CI coverage | Verified | `push: main` runs the full `verify` job on every `main` commit; each run pins and asserts its exact checked-out SHA in `verified-sha.txt`; the badge above reports the current `main` result |
+| `main` CI coverage | Verified | `push: main` runs the full matrix on every `main` commit; each job pins and asserts its exact checked-out SHA in `verified-sha.txt`; the badge above reports the current `main` result |
 | Deployment | Not applicable | library vertical slice |
 | Production-ready | Not claimed | no migrations, backup, monitoring, or multi-writer design |
 
