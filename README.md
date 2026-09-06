@@ -1,41 +1,36 @@
-# RevisionLedger
+<h1 align="center">RevisionLedger</h1>
 
-[![CI](https://github.com/umutseve4/RevisionLedger/actions/workflows/ci.yml/badge.svg)](https://github.com/umutseve4/RevisionLedger/actions/workflows/ci.yml)
+<p align="center">
+  US real GDP for Q4 2023 was <b>22672.859</b> on 25 January 2024<br>
+  and <b>22668.986</b> a month later. Both numbers were official.<br>
+  This ledger can still tell you which one a decision made on 27 January was based on.
+</p>
 
-A small, evidence-first bitemporal ledger for answering:
+<p align="center">
+  <a href="https://github.com/umutseve4/RevisionLedger/actions/workflows/ci.yml"><img src="https://github.com/umutseve4/RevisionLedger/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <img src="https://img.shields.io/badge/tests-16%20passing-FF4D4F?style=flat-square" alt="16 tests">
+  <img src="https://img.shields.io/badge/fixtures-2%20official%20vintages-FF4D4F?style=flat-square" alt="2 official vintages">
+</p>
+
+---
+
+## The question it answers
 
 > What economic value was valid for a period, and what was known about it on a specific decision date?
 
-The first vertical slice stores two official ALFRED vintages of **Real Gross Domestic Product (`GDPC1`)** for observation **2023-10-01**:
+The first vertical slice stores two official ALFRED vintages of **Real Gross
+Domestic Product (`GDPC1`)** for observation **2023-10-01**:
 
 | Source vintage | Value | Knowledge interval |
 |---|---:|---|
 | 2024-01-25 | 22672.859 | `[2024-01-25, 2024-02-28)` |
 | 2024-02-28 | 22668.986 | `[2024-02-28, ∞)` |
 
-The values are kept as canonical decimal text, not binary floating point. Each committed source response is bound to its exact URL, retrieval timestamp, byte size, and SHA-256 checksum in `data/raw/manifest.json`.
+Values are kept as canonical decimal text, not binary floating point. Every
+committed source response is bound to its exact URL, retrieval timestamp, byte
+size, and SHA-256 checksum in `data/raw/manifest.json`.
 
-## Why bitemporal?
-
-A normal time series records when a value applies. A bitemporal table records both:
-
-- **valid time** — the economic observation interval `[valid_from, valid_to)`;
-- **system/knowledge time** — the locally captured vintage interval `[system_from, system_to)`.
-
-`system_to IS NULL` means "latest snapshot in this local ledger," not "still current at ALFRED."
-
-## Reproduce
-
-```bash
-python -m pip install -e ".[dev]"
-pytest
-ruff format --check .
-ruff check .
-```
-
-CI runs from committed fixtures without live-data network access or repository write permission. Pull-request verification uploads JUnit XML plus the exact checked-out Git SHA as a run artifact. Fixture refreshes are explicit, reviewable data changes performed outside the verification workflow; `scripts/fetch_fixtures.py` validates bounded responses before they are proposed for commit.
-
-## Query
+## See the revision in eight lines
 
 ```python
 from revisionledger import as_of, connect, ingest_manifest
@@ -48,7 +43,23 @@ after = as_of(connection, "GDPC1", "2023-10-01", "2024-02-28")
 print(before.value, after.value)  # 22672.859 22668.986
 ```
 
-The query is parameterized and applies both half-open intervals:
+```bash
+python -m pip install -e ".[dev]"
+pytest
+ruff format --check .
+ruff check .
+```
+
+## Why bitemporal
+
+A normal time series records when a value applies. A bitemporal table records both:
+
+- **valid time** — the economic observation interval `[valid_from, valid_to)`;
+- **system/knowledge time** — the locally captured vintage interval `[system_from, system_to)`.
+
+`system_to IS NULL` means "latest snapshot in this local ledger," not "still
+current at ALFRED." The query is parameterized and applies both half-open
+intervals:
 
 ```sql
 WHERE series_id = ?
@@ -58,7 +69,7 @@ WHERE series_id = ?
   AND (system_to > ? OR system_to IS NULL)
 ```
 
-## Guarantees tested
+## Guarantees under test
 
 - exact SHA-256 and byte-size verification before database writes;
 - vintage-stamped ALFRED header verification (`GDPC1_YYYYMMDD`);
@@ -71,7 +82,21 @@ WHERE series_id = ?
 - missing `.` or empty cells become `NULL`, never zero;
 - an index supporting the point-in-time query.
 
-## Evidence status
+CI runs from committed fixtures without live-data network access or repository
+write permission. Pull-request verification uploads JUnit XML plus the exact
+checked-out Git SHA as a run artifact. Fixture refreshes are explicit, reviewable
+data changes performed outside the verification workflow;
+`scripts/fetch_fixtures.py` validates bounded responses before they are proposed
+for commit.
+
+## Limits
+
+This repository proves **one** real revision path. It does not yet provide a
+general downloader, migration framework, concurrent-writer protocol, or
+operational service. See [ROADMAP.md](ROADMAP.md).
+
+<details>
+<summary><b>Evidence status — layer by layer</b></summary>
 
 | Layer | Status | Evidence |
 |---|---|---|
@@ -84,16 +109,18 @@ WHERE series_id = ?
 | Deployment | Not applicable | library vertical slice |
 | Production-ready | Not claimed | no migrations, backup, monitoring, or multi-writer design |
 
-The two fixture byte lengths and SHA-256 values above were independently recomputed from the committed bytes and matched `data/raw/manifest.json` exactly.
+The two fixture byte lengths and SHA-256 values above were independently
+recomputed from the committed bytes and matched `data/raw/manifest.json` exactly.
 
-No commit can contain the result of its own CI run, so this table reports the coverage guarantee rather than a hardcoded run id that would go stale on the next push. The per-change evidence is the pull request's check runs together with the `verified-sha.txt` and `pytest.xml` artifacts uploaded by that run.
+No commit can contain the result of its own CI run, so this table reports the
+coverage guarantee rather than a hardcoded run id that would go stale on the next
+push. The per-change evidence is the pull request's check runs together with the
+`verified-sha.txt` and `pytest.xml` artifacts uploaded by that run.
 
-## Source and limitations
+</details>
+
+---
 
 Fixtures come from the [Federal Reserve Bank of St. Louis ALFRED graph endpoint](https://alfred.stlouisfed.org/) with `id`, `cosd`, `coed`, and `vintage_date` fixed in the manifest. ALFRED describes a vintage date as the historical data version available on that date.
-
-This repository proves one real revision path. It does not yet provide a general downloader, migration framework, concurrent-writer protocol, or operational service. See [ROADMAP.md](ROADMAP.md).
-
-## License
 
 MIT — see [LICENSE](LICENSE).
