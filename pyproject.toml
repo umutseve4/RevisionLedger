@@ -13,7 +13,7 @@ authors = [{ name = "Umut Sever" }]
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["pytest==9.1.1", "ruff==0.16.5"]
+dev = ["pytest==9.1.1", "ruff==0.16.6"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/revisionledger"]
